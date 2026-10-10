@@ -1,0 +1,51 @@
+
+[PATCH] Allow runtime log toggling
+
+Base: https://github.com/starifly/libneko
+Target patch commit: 6a85c185d62435a5293ef70ac3b638ae3ee1efa7
+---
+diff --git a/go.mod b/go.mod
+index ede267146876024ce1a9c28a4f826b0cd5d06504..1d34ef1a24569c1b92a35e1b4a8498f62798d040 100644
+--- a/go.mod
++++ b/go.mod
+@@ -1,3 +1,3 @@
+ module github.com/matsuridayo/libneko
+ 
+-go 1.19
++go 1.25.0
+diff --git a/neko_log/log.go b/neko_log/log.go
+index 81d89615d4694c6d41f13625a3361ec7bad3081b..d2d9592b1a42d63281166bd5d16b00cfea205505 100644
+--- a/neko_log/log.go
++++ b/neko_log/log.go
+@@ -6,16 +6,21 @@ import (
+ 	"log"
+ 	"os"
+ 	"runtime"
++	"sync/atomic"
+ 
+ 	"github.com/matsuridayo/libneko/neko_common"
+ 	"github.com/matsuridayo/libneko/syscallw"
+ )
+ 
+ var LogWriter *logWriter
+-var LogWriterDisable = false
++var logWriterDisabled atomic.Bool
+ var TruncateOnStart = true
+ var NB4AGuiLogWriter io.Writer
+ 
++func SetLogEnabled(enabled bool) {
++	logWriterDisabled.Store(!enabled)
++}
++
+ func SetupLog(maxSize int, path string) (err error) {
+ 	if LogWriter != nil {
+ 		return
+@@ -80,7 +85,7 @@ type logWriter struct {
+ }
+ 
+ func (w *logWriter) Write(p []byte) (int, error) {
+-	if LogWriterDisable {
++	if logWriterDisabled.Load() {
+ 		return len(p), nil
+ 	}
+ 
