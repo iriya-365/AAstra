@@ -26,3 +26,6 @@ if [ ! -f "$GOPATH/bin/gomobile-matsuri" ]; then
 fi
 
 GOBIND=gobind-matsuri gomobile-matsuri init
+
+# After local replace + patches, module graph may need refresh
+go mod tidy
