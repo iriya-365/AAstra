@@ -2,10 +2,10 @@
 
 source "buildScript/init/env.sh"
 
-# fetch soucre
+# fetch source
 bash buildScript/lib/core/get_source.sh
 
 [ -f libcore/go.mod ] || exit 1
 cd libcore
 
-./init.sh || exit 1
+bash ./init.sh || exit 1
